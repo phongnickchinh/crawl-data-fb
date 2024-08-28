@@ -3,7 +3,9 @@ cookie.txt
 
 #bỏ qua file log
 *.log
-
+*.txt
 #file test 
 friends.txt
 posts.txt
+#thư mục image
+image/

@@ -45,6 +45,8 @@ def get_list_friends(driver):
             break
     print("Total friends: ", count)
 
+
+#get newfeed posts
 def get_post_newfeed(driver):
     try:
 
