@@ -9,3 +9,6 @@ friends.txt
 posts.txt
 #thư mục image
 image/
+
+#đuôi pyc
+*.pyc
