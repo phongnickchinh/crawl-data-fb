@@ -1,0 +1,9 @@
+#bỏ qua cookie cá nhân
+cookie.txt
+
+#bỏ qua file log
+*.log
+
+#file test 
+friends.txt
+posts.txt
