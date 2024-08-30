@@ -71,6 +71,12 @@ def get_post_newfeed(driver):
                 if posts is not None:
                     with open("posts.txt", "a", encoding="utf-8") as f:
                         for post in posts:
+                            #find a tag have text include "Comment" (example "32 Comment", "Comment", "Comment 1")
+                            a_tag = post.find("a", text=lambda text: text and "omment" in text)
+                            #a link hae alot unnecessary characters, we only need a part of it, cut string when meet the second "&"
+                            link =a_tag['href'] if a_tag is not None else ""
+                            post_link = "https://mbasic.facebook.com" + link[:link.find("&", link.find("&")+1)]
+                            print(post_link)
                             # find div with tag header, this div contains poster's name
                             poster_div = post.find("header")
                             poster = poster_div.get_text(strip=True) if poster_div is not None else "Unknown"
@@ -82,10 +88,10 @@ def get_post_newfeed(driver):
                                 list_img = list_img.find_all('a')
                                 picture = ""
                                 for img in list_img:
-                                    picture += "https://mbasic.facebook.com" + img['href'] + "\n"
+                                    picture += "https://mbasic.facebook.com" + img['href'][:img['href'].find("&", img['href'].find("&")+1)] + "\n"
                             except:
                                 picture = ""
-                            f.write(poster + "\n" + text + "\n" + picture + "\n\n")
+                            f.write(post_link + "\n" + poster + "\n" + text + "\n" + picture + "\n")
                             
                 #click see more posts is a element which í child of div with id = m_show_more_pager
                 try:
