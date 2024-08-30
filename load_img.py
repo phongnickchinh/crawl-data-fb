@@ -75,7 +75,6 @@ def load_video(driver,output_folder,url, minimum_size = 50000):
     #check the size of the video, if too small, ignore
     if len(response.content) < minimum_size:
         print("Video too small or detected as a bot")
-        time.sleep(5)
         return
 
     #save video

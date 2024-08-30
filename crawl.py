@@ -1,6 +1,7 @@
 #mục tiêu của chương trình là đăng nhập vào facebook và lấy danh sách bạn bè
 #sử dụng cookie để đăng nhập
 import time
+import os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,7 +13,7 @@ from load_img import export_link
 # Khởi tạo trình điều khiển cho trình duyệt (ví dụ: Chrome)
 driver = webdriver.Chrome()
 # Đăng nhập vào Facebook
-driver = login(driver,"https://www.facebook.com")
+driver = login(driver,"https://mbasic.facebook.com")
 
 # get friends list of a user
 def get_list_friends(driver):
@@ -108,11 +109,12 @@ def get_post_newfeed(driver):
 
 # get_timeline of a page
 def get_timeline_page(driver, pagename):
+    count_post = 0
     try:
         page_link = "https://mbasic.facebook.com/" + pagename + "?v=timeline"
         driver.get(page_link)
         time.sleep(2)
-        count = 0
+        
         lastest_post_link = "fsdfsdfdsfdsfsd"
         while True:
             try:
@@ -133,7 +135,7 @@ def get_timeline_page(driver, pagename):
                             post_link = "https://mbasic.facebook.com" + link[:link.find("&", link.find("&")+1)]
                             if post_link == lastest_post_link:
                                 break
-                            if count == 0:
+                            if count_post == 0:
                                 lastest_post_link = post_link
                             print(post_link)
                             # find div with tag header, this div contains poster's name
@@ -141,7 +143,7 @@ def get_timeline_page(driver, pagename):
                             poster = poster_div.get_text(strip=True) if poster_div is not None else "Unknown"
                             # find text content of post, this div is next sibling of div with poster's name
                             text = poster_div.find_next_sibling("div").get_text(strip=True) if poster_div is not None else ""
-                            count += 1
+                            count_post += 1
                             try:
                                 #find all images in post
                                 list_img = poster_div.find_next_sibling("div").find_next_sibling("div")
@@ -151,7 +153,7 @@ def get_timeline_page(driver, pagename):
                                     picture += "https://mbasic.facebook.com" + img['href'][:img['href'].find("&", img['href'].find("&")+1)] + "\n"
                             except:
                                 picture = ""
-                            f.write(str(count) + "\n")
+                            f.write(str(count_post) + "\n")
                             f.write(post_link + "\n" + poster + "\n" + text + "\n" + picture + "\n")
                         except Exception as e:
                             print("Error when extracting posts")
@@ -176,7 +178,7 @@ def get_timeline_page(driver, pagename):
         print("Fucntion get_timeline_page error")
         print(e)
     finally:
-        print("Stop at post: ", count)
+        print("Stop at post: ", count_post)
 
 def get_list_followed_page(driver):
     driver.get("https://www.facebook.com/pages/?category=liked")
@@ -188,7 +190,7 @@ def get_list_followed_page(driver):
     while True:
         print("Scrolling...")
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(3)
+        time.sleep(5)
         new_height = driver.execute_script("return document.body.scrollHeight")
         print("New height: ", new_height)
         if new_height == last_height:
@@ -219,6 +221,9 @@ def get_list_followed_page(driver):
             continue
         print(pagename)
 
+        if not os.path.exists("followed_pages.txt"):
+            with open("followed_pages.txt", "w", encoding="utf-8") as f:
+                pass
         with open("followed_pages.txt", "a", encoding="utf-8") as f:
             f.write(pagename + "\n")
             count += 1
@@ -227,10 +232,26 @@ def get_list_followed_page(driver):
 # from load_img import export_link
 # export_link("posts.txt", driver)
 # # print("Done")
-# pageName  ="BoxGirlVn"
-# get_timeline_page(driver, pageName)
-# export_link("timeLine_"+ pageName + ".txt", "image_" + pageName, "video_" + pageName, driver)
-get_list_followed_page(driver)
+pageName  ="BoxGirlVn"
+get_timeline_page(driver, pageName)
+export_link("timeLine_"+ pageName + ".txt", "imgs_" + pageName, "vids_" + pageName, driver)
+# get_list_followed_page(driver)
+#read all link in followed_pages.txt
+# with open("followed_pages.txt", "r") as f:
+#     for line in f:
+#         try:
+#             line = line.replace("\n", "")
+#             print("Exporting ", line)
+#             get_timeline_page(driver, line)
+#             export_link("timeLine_"+line+".txt", "imgs_"+line, "vids_"+line, driver)
+#             print("Exported ", line)
+#             time.sleep(5)
+#         except Exception as e:
+#             print("Error: ", e)
+#             continue
 
-input("Press Enter to Exit....")
+
+
 driver.quit()
+#tự độn tắt máy sau khi chạy xong
+os.system("shutdown /s /t 1")
