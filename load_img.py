@@ -1,10 +1,12 @@
 
 import requests
 import time
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
-def export_link(file_name, driver):
+def export_link(file_name, filename_img, filename_vid, driver):
+    print("Exporting links...")
     list_line = []
     img_link_list = []
     with open(file_name, "r", encoding="utf-8") as f:
@@ -13,44 +15,77 @@ def export_link(file_name, driver):
 
     for line in list_line:
         try:
-            if line.startswith("https://"):
+            if line.startswith("https://mbasic.facebook.com/photo.php"):
+                #change to www.facebook.com
+                line = line.replace("https://mbasic.facebook.com", "https://www.facebook.com")
                 driver.get(line)
+                soup = BeautifulSoup(driver.page_source, "html.parser")
+                try:
+                    #find img have attribute data-visualcompletion="media-vc-image"
+                    imgs = soup.find_all("img", {"data-visualcompletion": "media-vc-image"})
+                    for img in imgs:
+                        load_img(img['src'],"images/" + filename_img)
+                except Exception as e:
+                    print("Error image link: ", line)
+                    print(e)
+                    continue
+            elif line.startswith("https://mbasic.facebook.com/video_redirect/"):
+                try:
+                    load_video(driver,"videos/" + filename_vid,line)
+                except Exception as e:
+                    print("Error video link: ", line)
+                    print(e)
+                    continue
         except Exception as e:
-            print("Error when getting link: ", e)
-            continue
-            #tìm thẻ img
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        try:
-            imgs = soup.find_all("img")
-            #lấy các thuộc tính của thẻ img có src bằng đầu bằng https://scontent
-            for img in imgs:
-                src= img.get("src")
-                if src.startswith("https://scontent"):
-                    load_img(src)
-                    img_link_list.append(src)
-        except Exception as e:
-            print("Error when getting image link: ", e)
+            print("Error link: ", e)
             continue
 
+    print("Exported links")
     return img_link_list
-def load_img(url):
 
-    # Tải ảnh về
+
+def load_img(url, output_folder, minimum_size = 5000):
+    directory = output_folder
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    #Load the image
     response = requests.get(url)
-    #@kiểm tra dung lượng ảnh để loại bỏ ảnh quá nhỏ (các icon chẳng hạn), những ảnh nhỏ hơn 5kb sẽ không được lưu
-    if len(response.content) < 5000:
+    #Check the size of the image, if too small, ignore
+    if len(response.content) < minimum_size:
         return
-    
-    # Lưu ảnh vào file trong thư mục hiện tại, đặt tên là image + thời gian tính đến giây
-    with open("image/image" + str(int(time.time())) + ".png", "wb") as f:
+    #Save image
+    with open(output_folder + "/img" + str(int(time.time())) + ".png", "wb") as f:
         f.write(response.content)
+
+def load_video(driver,output_folder,url, minimum_size = 50000):
+    driver.get(url)
+    directory = output_folder
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    
+    #Get the real video link
+    url = driver.current_url
+    # Tải video về
+    response = requests.get(url)
+    #check the size of the video, if too small, ignore
+    if len(response.content) < minimum_size:
+        print("Video too small or detected as a bot")
+        time.sleep(5)
+        return
+
+    #save video
+    with open(output_folder + "/video" + str(int(time.time())) + ".mp4", "wb") as f:
+        f.write(response.content)
+    
+    print("Video" + str(int(time.time())) + ".mp4 saved")
 
 
 # Test
-driver = webdriver.Chrome()
-from login import login
-driver = login(driver)
-img_link_list = export_link("posts.txt", driver)
+# driver = webdriver.Chrome()
+# from login import login
+# driver = login(driver)
+# # img_link_list = export_link("posts.txt", driver)
 
-input("Press Enter to close the browser")
-driver.quit()
+# export_link("posts.txt", driver)
+# input("Press Enter to close the browser")
+# driver.quit()
