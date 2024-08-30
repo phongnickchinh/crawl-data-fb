@@ -12,7 +12,7 @@ from load_img import export_link
 # Khởi tạo trình điều khiển cho trình duyệt (ví dụ: Chrome)
 driver = webdriver.Chrome()
 # Đăng nhập vào Facebook
-driver = login(driver)
+driver = login(driver,"https://www.facebook.com")
 
 # get friends list of a user
 def get_list_friends(driver):
@@ -178,15 +178,59 @@ def get_timeline_page(driver, pagename):
     finally:
         print("Stop at post: ", count)
 
+def get_list_followed_page(driver):
+    driver.get("https://www.facebook.com/pages/?category=liked")
+    driver.maximize_window()
+    time.sleep(2)
+    count = 0
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    print("Last height: ", last_height)
+    while True:
+        print("Scrolling...")
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(3)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        print("New height: ", new_height)
+        if new_height == last_height:
+            print("End of page")
+            break
+        last_height = new_height
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    print("Parsed!")
+    #find div wwith role = main
+    main_div = soup.find("div", {"role": "main"})
+    print("Found main div")
+    needed_divs = main_div.findChildren("div", recursive=False)
+    while True:
 
-# get_post_newfeed(driver)
+        print("Finding divs...")
+        needed_divs = needed_divs[0].findChildren("div", recursive=False)
+        if len(needed_divs) > 1:
+            print("Found!")
+            break
+        print(len(needed_divs))
+
+    
+    pages = needed_divs[1].find_all("a")
+    for page in pages:
+        #bỏ https://www.facebook.com/ trong href
+        pagename = page['href'][21:]
+        if "?" in pagename:
+            continue
+        print(pagename)
+
+        with open("followed_pages.txt", "a", encoding="utf-8") as f:
+            f.write(pagename + "\n")
+            count += 1
+    
 
 # from load_img import export_link
 # export_link("posts.txt", driver)
 # # print("Done")
-pageName  ="BoxGirlVn"
-get_timeline_page(driver, pageName)
-export_link("timeLine_"+ pageName + ".txt", "image_" + pageName, "video_" + pageName, driver)
+# pageName  ="BoxGirlVn"
+# get_timeline_page(driver, pageName)
+# export_link("timeLine_"+ pageName + ".txt", "image_" + pageName, "video_" + pageName, driver)
+get_list_followed_page(driver)
 
 input("Press Enter to Exit....")
 driver.quit()

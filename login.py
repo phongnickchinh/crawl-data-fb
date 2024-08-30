@@ -1,4 +1,4 @@
-def login(inputdriver):
+def login(inputdriver, url = "https://mbasic.facebook.com"):
      # Chuỗi cookie dài
     with open('cookie.txt', 'r') as f:
         cookie_string = f.read()
@@ -15,7 +15,7 @@ def login(inputdriver):
     # Khởi tạo trình điều khiển cho trình duyệt (ví dụ: Chrome)
     driver = inputdriver
     # Mở trang đăng nhập của Facebook
-    driver.get("https://mbasic.facebook.com")
+    driver.get(url)
     # Thêm từng cookie vào trình duyệt
     for cookie in cookies:
         driver.add_cookie(cookie)
