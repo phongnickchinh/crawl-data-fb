@@ -8,7 +8,9 @@ cookie.txt
 friends.txt
 posts.txt
 #thư mục image
+images/
+videos/
 image/
-
+video/
 #đuôi pyc
 *.pyc
