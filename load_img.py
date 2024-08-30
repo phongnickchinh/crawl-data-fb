@@ -5,11 +5,12 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
-def export_link(file_name, filename_img, filename_vid, driver):
+def export_link(input_file, filename_img, filename_vid, driver):
+    count = 0
     print("Exporting links...")
     list_line = []
     img_link_list = []
-    with open(file_name, "r", encoding="utf-8") as f:
+    with open(input_file, "r", encoding="utf-8") as f:
         for line in f:
             list_line.append(line.strip())
 
@@ -25,6 +26,7 @@ def export_link(file_name, filename_img, filename_vid, driver):
                     imgs = soup.find_all("img", {"data-visualcompletion": "media-vc-image"})
                     for img in imgs:
                         load_img(img['src'],"images/" + filename_img)
+                    count += 1
                 except Exception as e:
                     print("Error image link: ", line)
                     print(e)
@@ -32,10 +34,13 @@ def export_link(file_name, filename_img, filename_vid, driver):
             elif line.startswith("https://mbasic.facebook.com/video_redirect/"):
                 try:
                     load_video(driver,"videos/" + filename_vid,line)
+                    count += 1
                 except Exception as e:
                     print("Error video link: ", line)
                     print(e)
                     continue
+            if count % 100 == 0:
+                print("Exported ", count, "posts")
         except Exception as e:
             print("Error link: ", e)
             continue
