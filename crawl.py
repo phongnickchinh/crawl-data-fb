@@ -7,14 +7,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from login import login
+from load_img import export_link
 
 # Khởi tạo trình điều khiển cho trình duyệt (ví dụ: Chrome)
 driver = webdriver.Chrome()
-
 # Đăng nhập vào Facebook
 driver = login(driver)
 
-# get friends list
+# get friends list of a user
 def get_list_friends(driver):
     #open list friends
     driver.get("https://mbasic.facebook.com/profile.php?v=friends")
@@ -45,8 +45,7 @@ def get_list_friends(driver):
             break
     print("Total friends: ", count)
 
-
-#get newfeed posts
+#get newfeed posts of a user or a page manager
 def get_post_newfeed(driver):
     try:
 
