@@ -27,6 +27,8 @@ def export_link(input_file, filename_img, filename_vid, driver):
                     for img in imgs:
                         load_img(img['src'],"images/" + filename_img)
                     count += 1
+                    if count % 100 == 0:
+                        print("Exported ", count, "posts")
                 except Exception as e:
                     print("Error image link: ", line)
                     print(e)
@@ -34,13 +36,15 @@ def export_link(input_file, filename_img, filename_vid, driver):
             elif line.startswith("https://mbasic.facebook.com/video_redirect/"):
                 try:
                     load_video(driver,"videos/" + filename_vid,line)
+
                     count += 1
+                    if count % 100 == 0:
+                        print("Exported ", count, "posts")
                 except Exception as e:
                     print("Error video link: ", line)
                     print(e)
                     continue
-            if count % 100 == 0:
-                print("Exported ", count, "posts")
+
         except Exception as e:
             print("Error link: ", e)
             continue
@@ -49,17 +53,21 @@ def export_link(input_file, filename_img, filename_vid, driver):
     return img_link_list
 
 
-def load_img(url, output_folder, minimum_size = 5000):
+def load_img(url, output_folder,file_name = "", minimum_size = 5000):
     directory = output_folder
     if not os.path.exists(directory):
         os.makedirs(directory)
     #Load the image
-    response = requests.get(url)
+    response = requests.get(url, stream=True, allow_redirects=False)
     #Check the size of the image, if too small, ignore
     if len(response.content) < minimum_size:
         return
+    else:
+        print(len(response.content))
     #Save image
-    with open(output_folder + "/img" + str(int(time.time())) + ".png", "wb") as f:
+    if file_name == "":
+        file_name = str(int(time.time()))
+    with open(output_folder + "/img" + file_name + ".jpg", "wb") as f:
         f.write(response.content)
 
 def load_video(driver,output_folder,url, minimum_size = 50000):
