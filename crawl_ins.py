@@ -75,8 +75,8 @@ def get_all_following(browser, username= "zwindy_412"):
         return None
 
 
-# Đường dẫn đến ChromeDriver
-chrome_path = r"C:\chromedriver-win64\chromedriver-win64\chromedriver.exe"
+# Đường dẫn đến ChromeDriver, lấy từ thư mục config/browser_path.txt
+chrome_path = open("config/browser_path.txt", "r").readline().strip()
 service = Service(chrome_path)
 # Create Chromeoptions instance 
 options = webdriver.ChromeOptions() 
