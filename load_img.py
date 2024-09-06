@@ -7,12 +7,22 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 def export_link(input_file, filename_img, filename_vid, driver):
     count = 0
+    found = False
     print("Exporting links...")
     list_line = []
     img_link_list = []
+    with open("line_got.txt", "r") as file:
+        last_line = file.readlines()
+        if last_line:
+            last_line = last_line[-1].strip()
+        else:
+            print("line_got is empty")
     with open(input_file, "r", encoding="utf-8") as f:
         for line in f:
-            list_line.append(line.strip())
+            if found:
+                list_line.append(line.strip())
+            if line.strip() in last_line:
+                found = True
 
     for line in list_line:
         try:
@@ -27,8 +37,12 @@ def export_link(input_file, filename_img, filename_vid, driver):
                     for img in imgs:
                         load_img(img['src'],"images/" + filename_img)
                     count += 1
-                    if count % 100 == 0:
-                        print("Exported ", count, "posts")
+                    if count % 10 == 0:
+                        with open("line_got.txt","a") as f:
+                            line = line.replace("https://www.facebook.com", "https://mbasic.facebook.com")
+                            f.write(line+"\n")
+                        if count %100==0:
+                            print("Exported ", count, "posts")
                 except Exception as e:
                     print("Error image link: ", line)
                     print(e)
@@ -38,8 +52,12 @@ def export_link(input_file, filename_img, filename_vid, driver):
                     load_video(driver,"videos/" + filename_vid,line)
 
                     count += 1
-                    if count % 100 == 0:
-                        print("Exported ", count, "posts")
+                    if count % 10 == 0:
+                        with open("line_got.txt","a") as f:
+                            line = line.replace("https://www.facebook.com", "https://mbasic.facebook.com")
+                            f.write(line+"\n")
+                        if count %100==0:
+                            print("Exported ", count, "posts")
                 except Exception as e:
                     print("Error video link: ", line)
                     print(e)
@@ -62,8 +80,6 @@ def load_img(url, output_folder,file_name = "", minimum_size = 5000):
     #Check the size of the image, if too small, ignore
     if len(response.content) < minimum_size:
         return
-    else:
-        print(len(response.content))
     #Save image
     if file_name == "":
         file_name = str(int(time.time()))
