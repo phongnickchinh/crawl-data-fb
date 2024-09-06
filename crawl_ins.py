@@ -67,7 +67,6 @@ def get_all_following(browser, username= "zwindy_412"):
         for i in range(2):
             inside_div= inside_div.find_element(By.XPATH, "./*")
             print(inside_div.size)
-        print(inside_div.get_attribute("innerHTML"))
         #TODO: scroll the div, will be done tongiht
         time.sleep(5000)
 
@@ -77,7 +76,7 @@ def get_all_following(browser, username= "zwindy_412"):
 
 
 # Đường dẫn đến ChromeDriver
-chrome_path = r"C:\chromedriver-win64 (1)\chromedriver-win64\chromedriver.exe"
+chrome_path = r"C:\chromedriver-win64\chromedriver-win64\chromedriver.exe"
 service = Service(chrome_path)
 # Create Chromeoptions instance 
 options = webdriver.ChromeOptions() 

@@ -7,13 +7,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from login import login
 from load_img import export_link
 
-# Khởi tạo trình điều khiển cho trình duyệt (ví dụ: Chrome)
-driver = webdriver.Chrome()
-# Đăng nhập vào Facebook
-driver = login(driver,"https://mbasic.facebook.com")
+
 
 # get friends list of a user
 def get_list_friends(driver):
@@ -26,7 +24,7 @@ def get_list_friends(driver):
     #find all elements with tag a, class = ch
     while True:
         friends = driver.find_elements(By.CSS_SELECTOR, "td.w.t a")
-        with open("friends.txt", "a", encoding="utf-8") as f:
+        with open("text_file/friends.txt", "a", encoding="utf-8") as f:
             for friend in friends:
                 #get text and link of each friend
                 f.write(friend.text + ":  ") + f.write(friend.get_attribute("href") + "\n")
@@ -69,7 +67,7 @@ def get_post_newfeed(driver):
                 #find all articles in section, each article is a post
                 posts = section.find_all("article", recursive=False)
                 if posts is not None:
-                    with open("posts.txt", "a", encoding="utf-8") as f:
+                    with open("text_file/posts.txt", "a", encoding="utf-8") as f:
                         for post in posts:
                             #find a tag have text include "Comment" (example "32 Comment", "Comment", "Comment 1")
                             a_tag = post.find("a", text=lambda text: text and "omment" in text)
@@ -124,7 +122,7 @@ def get_timeline_page(driver, pagename):
                 section = feed.find("section")
                 list_posts = section.find_all("article", recursive=False)
 
-                with open("timeLine_" + pagename + ".txt", "a", encoding="utf-8") as f:
+                with open("text_file/timeline/timeLine_" + pagename + ".txt", "a", encoding="utf-8") as f:
                     for post in list_posts:
                         try:
 
@@ -221,37 +219,24 @@ def get_list_followed_page(driver):
             continue
         print(pagename)
 
-        if not os.path.exists("followed_pages.txt"):
-            with open("followed_pages.txt", "w", encoding="utf-8") as f:
+        if not os.path.exists("text_file/followed_pages.txt"):
+            with open("text_file/followed_pages.txt", "w", encoding="utf-8") as f:
                 pass
-        with open("followed_pages.txt", "a", encoding="utf-8") as f:
+        with open("text_file/followed_pages.txt", "a", encoding="utf-8") as f:
             f.write(pagename + "\n")
             count += 1
     
+# Khởi tạo trình điều khiển cho trình duyệt (ví dụ: Chrome)
+chrome_options = Options()
+# chrome_options.add_argument("--headless")  # Bật chế độ không giao diện
+chrome_options.add_argument("--incognito")  # Bật chế độ ẩn danh
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 
-# from load_img import export_link
-# export_link("posts.txt", driver)
-# # print("Done")
-pageName  ="BoxGirlVn"
-get_timeline_page(driver, pageName)
-export_link("timeLine_"+ pageName + ".txt", "imgs_" + pageName, "vids_" + pageName, driver)
-# get_list_followed_page(driver)
-#read all link in followed_pages.txt
-# with open("followed_pages.txt", "r") as f:
-#     for line in f:
-#         try:
-#             line = line.replace("\n", "")
-#             print("Exporting ", line)
-#             get_timeline_page(driver, line)
-#             export_link("timeLine_"+line+".txt", "imgs_"+line, "vids_"+line, driver)
-#             print("Exported ", line)
-#             time.sleep(5)
-#         except Exception as e:
-#             print("Error: ", e)
-#             continue
+driver = webdriver.Chrome(options=chrome_options)
+driver = login(driver,"https://mbasic.facebook.com")
+driver = login(driver,"https://www.facebook.com")
 
-
-
+pageName  ="1977vlog"
+# get_timeline_page(driver,pageName)
+export_link("text_file/timeline/timeLine_"+pageName+".txt", "imgs_"+pageName, "vids_"+pageName, driver)
 driver.quit()
-#tự độn tắt máy sau khi chạy xong
-os.system("shutdown /s /t 1")
